@@ -16,7 +16,7 @@ export class AppService {
     return await this.Repository.find();
   }
 
-  async getToken(token: string): Promise<Tokens> {
+  async getToken(token: string): Promise<{ url: string }> {
     const _token: Tokens = await this.Repository.findOneBy({ token });
     if (_token) {
       if (_token.connectQty && _token.connectQty > 1) {
@@ -26,7 +26,7 @@ export class AppService {
       } else {
         await this.Repository.delete(_token.id);
       }
-      return _token;
+      return { url: _token.originalUrl };
     } else {
       throw new HttpException('Token not found', 404);
     }
@@ -37,16 +37,15 @@ export class AppService {
       originalUrl: payload.url,
     });
     if (!saved_url) {
-      const token: Tokens = await this.Repository.create({
+      const token: Tokens = this.Repository.create({
         originalUrl: payload.url,
         connectQty: payload.connectQty,
         hashedPassword: payload.password,
-        deathDate: payload.deathAfter,
+        deathDate: payload.deathDate,
       });
-      const saved_token = await this.Repository.save(token);
+      const saved_token: Tokens = await this.Repository.save(token);
       return { token: saved_token.token };
     }
     return { token: saved_url.token };
   }
-
 }

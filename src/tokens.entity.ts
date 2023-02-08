@@ -33,8 +33,8 @@ export class Tokens {
 
   @BeforeInsert()
   async hashUrl() {
-    const hasher = new Hashids('', 7);
-    this.token = hasher.encode(new Date().getTime());
+    const hasher = new Hashids(this.originalUrl, 3);
+    this.token = hasher.encode(this.originalUrl.length);
   }
   async hashPassword() {
     const salt = await genSalt(10);
