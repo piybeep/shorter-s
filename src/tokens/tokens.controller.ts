@@ -1,14 +1,13 @@
-import { Controller, Get, Post, Query } from '@nestjs/common';
-import { Body, Param } from '@nestjs/common/decorators';
-import { ApiBody, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger/dist';
-import { AppService } from './app.service';
-import { SaveUrlDto } from './save-url.dto';
-import { Tokens } from './tokens.entity';
+import { ApiBody, ApiParam, ApiResponse, ApiTags } from "@nestjs/swagger";
+import { Controller, Get, Param, Post, Body } from '@nestjs/common';
+import { TokensService } from './tokens.service';
+import { Tokens } from './entities/tokens.entity';
+import { SaveUrlDto } from "./dto/save-url.dto";
 
-@ApiTags('App')
+@ApiTags('tokens')
 @Controller()
-export class AppController {
-  constructor(private readonly appService: AppService) {}
+export class TokensController {
+  constructor(private readonly tokensService: TokensService) {}
 
   @ApiResponse({
     type: Array<Tokens>,
@@ -16,7 +15,7 @@ export class AppController {
   })
   @Get()
   getAllTokens() {
-    return this.appService.getAllTokens();
+    return this.tokensService.getAllTokens();
   }
   @ApiParam({ name: 'token', type: 'string' })
   @ApiResponse({
@@ -25,7 +24,7 @@ export class AppController {
   })
   @Get(':token')
   getToken(@Param('token') token: string): Promise<{ url: string }> {
-    return this.appService.getToken(token);
+    return this.tokensService.getToken(token);
   }
 
   @ApiBody({ type: SaveUrlDto })
@@ -35,6 +34,6 @@ export class AppController {
   })
   @Post()
   async saveUrl(@Body() data: SaveUrlDto): Promise<{ token: string }> {
-    return await this.appService.saveUrl(data);
+    return await this.tokensService.saveUrl(data);
   }
 }

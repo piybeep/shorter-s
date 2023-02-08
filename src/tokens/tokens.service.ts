@@ -1,12 +1,11 @@
-import { HttpException, Injectable } from '@nestjs/common';
-import { Repository } from 'typeorm';
-import { Tokens } from './tokens.entity';
-import { SaveUrlDto } from './save-url.dto';
+import { Injectable, HttpException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { NOTFOUND } from 'dns';
+import { Repository } from 'typeorm';
+import { SaveUrlDto } from './dto/save-url.dto';
+import { Tokens } from './entities/tokens.entity';
 
 @Injectable()
-export class AppService {
+export class TokensService {
   constructor(
     @InjectRepository(Tokens)
     private readonly Repository: Repository<Tokens>,
@@ -23,7 +22,7 @@ export class AppService {
         await this.Repository.update(_token.id, {
           connectQty: _token.connectQty - 1,
         });
-      } else {
+      } else if (_token.connectQty === 1) {
         await this.Repository.delete(_token.id);
       }
       return { url: _token.originalUrl };
@@ -47,5 +46,12 @@ export class AppService {
       return { token: saved_token.token };
     }
     return { token: saved_url.token };
+  }
+
+  async deleteExpiredTokens(): Promise<void> {
+    const expired_tokens: Tokens[] = await this.Repository.query(
+      `SELECT * from tokens where deathDate < ${Date.now()}`,
+    );
+    this.Repository.remove(expired_tokens);
   }
 }
