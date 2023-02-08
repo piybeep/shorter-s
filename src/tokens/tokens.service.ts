@@ -1,6 +1,6 @@
 import { Injectable, HttpException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, Repository, SelectQueryBuilder } from 'typeorm';
 import { SaveUrlDto } from './dto/save-url.dto';
 import { Tokens } from './entities/tokens.entity';
 
@@ -35,7 +35,11 @@ export class TokensService {
     const saved_url: Tokens = await this.Repository.findOneBy({
       originalUrl: payload.url,
     });
+
     if (!saved_url) {
+      if (payload.deathDate) {
+        payload.deathDate = this.toZeroTimeZone(new Date(payload.deathDate));
+      }
       const token: Tokens = this.Repository.create({
         originalUrl: payload.url,
         connectQty: payload.connectQty,
@@ -49,9 +53,21 @@ export class TokensService {
   }
 
   async deleteExpiredTokens(): Promise<void> {
-    const expired_tokens: Tokens[] = await this.Repository.query(
-      `SELECT * from tokens where deathDate < ${Date.now()}`,
-    );
+    const date = new Date();
+    console.log(date.toISOString());
+
+    const expired_tokens: Tokens[] = await this.Repository.createQueryBuilder(
+      'tokens',
+    )
+      .where('"deathDate" < :date', {
+        date: date.toISOString(),
+      })
+      .getMany();
     this.Repository.remove(expired_tokens);
+  }
+
+  private toZeroTimeZone(date: any): Date {
+    date.setHours(date.getHours() - 3);
+    return date;
   }
 }

@@ -1,8 +1,8 @@
-import { ApiBody, ApiParam, ApiResponse, ApiTags } from "@nestjs/swagger";
+import { ApiBody, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Controller, Get, Param, Post, Body } from '@nestjs/common';
 import { TokensService } from './tokens.service';
 import { Tokens } from './entities/tokens.entity';
-import { SaveUrlDto } from "./dto/save-url.dto";
+import { SaveUrlDto } from './dto/save-url.dto';
 
 @ApiTags('tokens')
 @Controller()

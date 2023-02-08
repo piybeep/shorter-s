@@ -25,7 +25,7 @@ import { TokensModule } from './tokens/tokens.module';
         logging: false,
       }),
     }),
- 
+
     ScheduleModule.forRoot(),
     ConfigModule.forRoot({ isGlobal: true, envFilePath: './.env' }),
     TasksModule,

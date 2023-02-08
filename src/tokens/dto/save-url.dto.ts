@@ -1,6 +1,13 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsUrl } from 'class-validator';
-import { IsDate, IsInt, IsPositive, IsStrongPassword } from 'class-validator';
+import {
+  IsDate,
+  IsOptional,
+  IsUrl,
+  IsInt,
+  IsPositive,
+  IsStrongPassword,
+  IsDateString,
+} from 'class-validator';
 
 export class SaveUrlDto {
   @ApiProperty()
@@ -8,7 +15,8 @@ export class SaveUrlDto {
   url: string;
 
   @ApiPropertyOptional()
-  @IsDate()
+  // @IsDate()
+  @IsDateString()
   @IsOptional()
   deathDate?: Date;
 
