@@ -54,8 +54,6 @@ export class TokensService {
 
   async deleteExpiredTokens(): Promise<void> {
     const date = new Date();
-    console.log(date.toISOString());
-
     const expired_tokens: Tokens[] = await this.tokensRepository
       .createQueryBuilder('tokens')
       .where('"deathDate" < :date', {
