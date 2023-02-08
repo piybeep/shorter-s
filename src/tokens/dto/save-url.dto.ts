@@ -1,6 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
-  IsDate,
   IsOptional,
   IsUrl,
   IsInt,
@@ -15,7 +14,6 @@ export class SaveUrlDto {
   url: string;
 
   @ApiPropertyOptional()
-  // @IsDate()
   @IsDateString()
   @IsOptional()
   deathDate?: Date;

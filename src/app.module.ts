@@ -3,7 +3,6 @@ import { ConfigModule } from '@nestjs/config';
 import { ConfigService } from '@nestjs/config/dist';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Tokens } from './tokens/entities/tokens.entity';
 import { TasksModule } from './tasks/tasks.module';
 import { TokensModule } from './tokens/tokens.module';
 
@@ -25,7 +24,6 @@ import { TokensModule } from './tokens/tokens.module';
         logging: false,
       }),
     }),
-
     ScheduleModule.forRoot(),
     ConfigModule.forRoot({ isGlobal: true, envFilePath: './.env' }),
     TasksModule,
