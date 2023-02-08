@@ -56,9 +56,8 @@ export class TokensService {
     const date = new Date();
     console.log(date.toISOString());
 
-    const expired_tokens: Tokens[] = await this.tokensRepository.createQueryBuilder(
-      'tokens',
-    )
+    const expired_tokens: Tokens[] = await this.tokensRepository
+      .createQueryBuilder('tokens')
       .where('"deathDate" < :date', {
         date: date.toISOString(),
       })
