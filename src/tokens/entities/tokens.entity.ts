@@ -38,7 +38,7 @@ export class Tokens {
   }
   @BeforeInsert()
   async hashPassword() {
-    if(this.hashedPassword){
+    if (this.hashedPassword) {
       const salt = await genSalt(10);
       this.hashedPassword = await hash(this.hashedPassword, salt);
     }
