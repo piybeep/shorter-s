@@ -1,14 +1,13 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ConfigService } from '@nestjs/config/dist';
+import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { Tokens } from './tokens.entity';
+import { TasksModule } from './tasks/tasks.module';
+import { TokensModule } from './tokens/tokens.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true, envFilePath: './.env' }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -25,9 +24,10 @@ import { Tokens } from './tokens.entity';
         logging: false,
       }),
     }),
-    TypeOrmModule.forFeature([Tokens]),
+    ScheduleModule.forRoot(),
+    ConfigModule.forRoot({ isGlobal: true, envFilePath: './.env' }),
+    TasksModule,
+    TokensModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
 })
 export class AppModule {}
