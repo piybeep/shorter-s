@@ -1,6 +1,6 @@
 import { Injectable, HttpException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, LessThan } from 'typeorm';
 import { SaveUrlDto } from './dto/save-url.dto';
 import { Tokens } from './entities/tokens.entity';
 
@@ -55,12 +55,9 @@ export class TokensService {
 
   async deleteExpiredTokens(): Promise<void> {
     const date = new Date();
-    const expired_tokens: Tokens[] = await this.tokensRepository
-      .createQueryBuilder('tokens')
-      .where('"deathDate" < :date', {
-        date: date.toISOString(),
-      })
-      .getMany();
+    const expired_tokens: Tokens[] = await this.tokensRepository.find({
+      where: { deathDate: LessThan(date) },
+    });
     this.tokensRepository.remove(expired_tokens);
   }
 
