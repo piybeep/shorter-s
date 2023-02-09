@@ -13,7 +13,7 @@ export class Tokens {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ unique: true })
+  @Column()
   originalUrl: string;
 
   @Column({ unique: true })
@@ -31,11 +31,11 @@ export class Tokens {
   @CreateDateColumn()
   createdAt: Date;
 
-  @BeforeInsert()
-  async hashUrl() {
-    const hasher = new Hashids(this.originalUrl, 3);
-    this.token = hasher.encode(this.originalUrl.length);
-  }
+  // @BeforeInsert()
+  // async hashUrl() {
+  //   const hasher = new Hashids(this.originalUrl, 3);
+  //   this.token = hasher.encode(this.originalUrl.length);
+  // }
   @BeforeInsert()
   async hashPassword() {
     if (this.hashedPassword) {
