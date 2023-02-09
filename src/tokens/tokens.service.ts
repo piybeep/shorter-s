@@ -19,8 +19,6 @@ export class TokensService {
     const db_token: Tokens = await this.tokensRepository.findOneBy({ token });
 
     if (db_token) {
-      console.log(db_token.deathDate, '\n', new Date(Date.now()));
-
       if (db_token.deathDate < new Date(Date.now())) {
         await this.tokensRepository.remove(db_token);
         throw new HttpException('Not Found', 404);
