@@ -7,9 +7,9 @@ export class TasksService {
   constructor(private readonly tokensService: TokensService) {}
   private readonly logger = new Logger(TasksService.name);
 
-  @Cron(CronExpression.EVERY_5_MINUTES)
+  @Cron(CronExpression.EVERY_WEEK)
   deleteExpiredTokens() {
-    // this.tokensService.deleteExpiredTokens();
+    this.tokensService.deleteExpiredTokens();
     this.logger.debug('deleted');
   }
 }
