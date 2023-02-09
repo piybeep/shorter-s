@@ -6,7 +6,6 @@ import {
   BeforeInsert,
 } from 'typeorm';
 import { hash, genSalt } from 'bcrypt';
-import Hashids from 'hashids/cjs/hashids';
 
 @Entity('tokens')
 export class Tokens {
@@ -31,11 +30,6 @@ export class Tokens {
   @CreateDateColumn()
   createdAt: Date;
 
-  // @BeforeInsert()
-  // async hashUrl() {
-  //   const hasher = new Hashids(this.originalUrl, 3);
-  //   this.token = hasher.encode(this.originalUrl.length);
-  // }
   @BeforeInsert()
   async hashPassword() {
     if (this.hashedPassword) {
