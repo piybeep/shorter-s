@@ -92,7 +92,7 @@ export class TokensService {
   }
 
   getHash(url: string, count = 0): string {
-    const hasher = new hashids(url, 3);
+    const hasher = new hashids(url, 6);
     return hasher.encode(url.length + count);
   }
 
