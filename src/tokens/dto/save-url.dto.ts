@@ -12,7 +12,7 @@ import {
 
 export class SaveUrlDto {
   @ApiProperty()
-  @IsUrl()
+  @IsUrl({}, { message: 'Невалидная ссылка' })
   url: string;
 
   @ApiPropertyOptional()

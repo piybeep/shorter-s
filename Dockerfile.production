@@ -1,7 +1,7 @@
 FROM node:lts-alpine as dependencies
 WORKDIR /app
 COPY package*.json ./
-RUN npm i
+RUN npm i -s
 
 FROM node:lts-alpine as builder
 WORKDIR /app

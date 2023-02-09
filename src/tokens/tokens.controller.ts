@@ -5,7 +5,7 @@ import { Tokens } from './entities/tokens.entity';
 import { SaveUrlDto } from './dto/save-url.dto';
 
 @ApiTags('tokens')
-@Controller()
+@Controller('tokens')
 export class TokensController {
   constructor(private readonly tokensService: TokensService) {}
 

@@ -20,16 +20,23 @@ export class TokensService {
     const db_token: Tokens = await this.tokensRepository.findOneBy({ token });
 
     if (db_token) {
-      if (db_token.deathDate < new Date(Date.now())) {
+      // Удалить если кончилось время жизни
+      if (db_token.deathDate && db_token.deathDate < new Date(Date.now())) {
         await this.tokensRepository.remove(db_token);
         throw new HttpException('Not Found', 404);
-      } else if (db_token.connectQty && db_token.connectQty > 1) {
-        await this.tokensRepository.update(db_token.id, {
-          connectQty: db_token.connectQty - 1,
-        });
-      } else if (db_token.connectQty && db_token.connectQty === 1) {
-        await this.tokensRepository.delete(db_token.id);
       }
+
+      if (db_token.connectQty != null) {
+        // Уменьшить оставшееся кол-во переходов и удалить, если количество  равно 1 (или меньше)
+        if (db_token.connectQty > 1) {
+          await this.tokensRepository.update(db_token.id, {
+            connectQty: --db_token.connectQty,
+          });
+        } else {
+          await this.tokensRepository.delete(db_token.id);
+        }
+      }
+
       return { url: db_token.originalUrl };
     } else {
       throw new HttpException('Token not found', 404);
@@ -41,42 +48,52 @@ export class TokensService {
       originalUrl: payload.url,
     });
 
-    if (!count) {
-      const token: Tokens = this.tokensRepository.create({
-        token: this.getHash(payload.url, count),
-        originalUrl: payload.url,
-        connectQty: payload.connectQty,
-        hashedPassword: payload.password,
-        deathDate: payload.deathDate,
-      });
-      const saved_token: Tokens = await this.tokensRepository.save(token);
+    let token: string;
 
-      return { token: saved_token.token };
-    } else {
+    if (count > 0) {
       const find_equal_token = await this.tokensRepository.findOneBy({
         originalUrl: payload.url,
         connectQty: payload.connectQty,
         hashedPassword: payload.password,
         deathDate: payload.deathDate,
       });
-      if (find_equal_token) return { token: find_equal_token.token };
 
-      const token: Tokens = this.tokensRepository.create({
+      if (find_equal_token) {
+        // Ссылка есть в базе с теми же параметрами
+        token = find_equal_token.token;
+      } else {
+        // Ссылка есть в базе, но пришли другие параметры
+        const new_token: Tokens = this.tokensRepository.create({
+          token: this.getHash(payload.url, count),
+          originalUrl: payload.url,
+          connectQty: payload.connectQty,
+          hashedPassword: payload.password,
+          deathDate: payload.deathDate,
+        });
+
+        await this.tokensRepository.save(new_token);
+        token = new_token.token;
+      }
+    } else {
+      // Сохранение новой ссылки
+      const new_token: Tokens = this.tokensRepository.create({
         token: this.getHash(payload.url, count),
         originalUrl: payload.url,
         connectQty: payload.connectQty,
         hashedPassword: payload.password,
         deathDate: payload.deathDate,
       });
-      await this.tokensRepository.save(token);
-      return { token: token.token };
+
+      await this.tokensRepository.save(new_token);
+      token = new_token.token;
     }
+
+    return { token };
   }
 
   getHash(url: string, count = 0): string {
     const hasher = new hashids(url, 3);
-    const g_token = hasher.encode(url.length + count);
-    return g_token;
+    return hasher.encode(url.length + count);
   }
 
   async deleteExpiredTokens(): Promise<void> {

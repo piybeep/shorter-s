@@ -8,6 +8,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.setGlobalPrefix('api');
   app.useGlobalPipes(new ValidationPipe());
+  app.enableCors({ origin: true });
 
   const config = new DocumentBuilder()
       .setTitle('shorterAPI')
@@ -17,6 +18,6 @@ async function bootstrap() {
     document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('/api/doc', app, document);
 
-  await app.listen(process.env.API_PORT || 3089);
+  await app.listen(process.env.API_PORT || 3085);
 }
 bootstrap();
