@@ -73,7 +73,7 @@ export class TokensService {
     }
   }
 
-  getHash(url: string, count: number = 0): string {
+  getHash(url: string, count = 0): string {
     const hasher = new hashids(url, 3);
     const g_token = hasher.encode(url.length + count);
     return g_token;
@@ -85,10 +85,5 @@ export class TokensService {
       where: { deathDate: LessThan(date) },
     });
     this.tokensRepository.remove(expired_tokens);
-  }
-
-  private toZeroTimeZone(date: any): Date {
-    date.setHours(date.getHours() - 3);
-    return date;
   }
 }

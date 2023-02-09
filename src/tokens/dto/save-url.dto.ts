@@ -6,7 +6,6 @@ import {
   IsInt,
   IsPositive,
   IsStrongPassword,
-  IsDateString,
   MinDate,
   IsDate,
 } from 'class-validator';
@@ -17,7 +16,7 @@ export class SaveUrlDto {
   url: string;
 
   @ApiPropertyOptional()
-  @Transform(({value})=>value&&new Date(value))
+  @Transform(({ value }) => value && new Date(value))
   @IsDate()
   @MinDate(new Date())
   @IsOptional()
