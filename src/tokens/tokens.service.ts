@@ -15,17 +15,23 @@ export class TokensService {
     return await this.tokensRepository.find();
   }
 
-  async getToken(token: string): Promise<{ url: string }> {
-    const _token: Tokens = await this.tokensRepository.findOneBy({ token });
-    if (_token) {
-      if (_token.connectQty && _token.connectQty > 1) {
-        await this.tokensRepository.update(_token.id, {
-          connectQty: _token.connectQty - 1,
+  async getUrl(token: string): Promise<{ url: string }> {
+    const db_token: Tokens = await this.tokensRepository.findOneBy({ token });
+
+    if (db_token) {
+      console.log(db_token.deathDate, '\n', new Date(Date.now()));
+
+      if (db_token.deathDate < new Date(Date.now())) {
+        await this.tokensRepository.remove(db_token);
+        throw new HttpException('Not Found', 404);
+      } else if (db_token.connectQty && db_token.connectQty > 1) {
+        await this.tokensRepository.update(db_token.id, {
+          connectQty: db_token.connectQty - 1,
         });
-      } else if (_token.connectQty === 1) {
-        await this.tokensRepository.delete(_token.id);
+      } else if (db_token.connectQty && db_token.connectQty === 1) {
+        await this.tokensRepository.delete(db_token.id);
       }
-      return { url: _token.originalUrl };
+      return { url: db_token.originalUrl };
     } else {
       throw new HttpException('Token not found', 404);
     }
@@ -37,9 +43,6 @@ export class TokensService {
     });
 
     if (!saved_url) {
-      if (payload.deathDate) {
-        payload.deathDate = this.toZeroTimeZone(new Date(payload.deathDate));
-      }
       const token: Tokens = this.tokensRepository.create({
         originalUrl: payload.url,
         connectQty: payload.connectQty,

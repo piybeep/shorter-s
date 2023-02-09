@@ -23,8 +23,8 @@ export class TokensController {
     description: 'Получение ссылки по токену.',
   })
   @Get(':token')
-  getToken(@Param('token') token: string): Promise<{ url: string }> {
-    return this.tokensService.getToken(token);
+  getUrl(@Param('token') token: string): Promise<{ url: string }> {
+    return this.tokensService.getUrl(token);
   }
 
   @ApiBody({ type: SaveUrlDto })

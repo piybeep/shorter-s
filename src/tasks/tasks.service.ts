@@ -9,7 +9,7 @@ export class TasksService {
 
   @Cron(CronExpression.EVERY_5_MINUTES)
   deleteExpiredTokens() {
-    this.tokensService.deleteExpiredTokens();
+    // this.tokensService.deleteExpiredTokens();
     this.logger.debug('deleted');
   }
 }
