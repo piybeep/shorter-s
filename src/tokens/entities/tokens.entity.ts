@@ -6,7 +6,6 @@ import {
   BeforeInsert,
 } from 'typeorm';
 import { hash, genSalt } from 'bcrypt';
-import { Exclude } from 'class-transformer';
 
 @Entity('tokens')
 export class Tokens {

@@ -52,7 +52,7 @@ export class TokensService {
     let token: Tokens;
 
     if (count > 0) {
-      let find_equal_token = await this.tokensRepository.find({
+      const find_equal_token = await this.tokensRepository.find({
         where: {
           originalUrl: payload.url,
           connectQty: payload.connectQty,
@@ -64,12 +64,13 @@ export class TokensService {
         // Ссылка есть в базе с теми же параметрами
         if (payload.password) {
           // Для ссылки существует пароль
-          let token_with_password: Tokens[];
-          token_with_password = find_equal_token.filter((token): Boolean => {
-            if (token.hashedPassword != null) {
-              return compareSync(payload.password, token.hashedPassword);
-            } else return false;
-          });
+          const token_with_password: Tokens[] = find_equal_token.filter(
+            (token): boolean => {
+              if (token.hashedPassword != null) {
+                return compareSync(payload.password, token.hashedPassword);
+              } else return false;
+            },
+          );
           if (token_with_password.length > 0) {
             // Найдена ссылка с таким же паролем и параметрами
             token = token_with_password[0];
@@ -128,7 +129,7 @@ export class TokensService {
   }
 
   genereateResponse(entity: Tokens): Partial<Tokens> {
-    const { id, createdAt, ..._entity } = entity;
+    const { id=null, createdAt=null, ..._entity } = entity;
     return _entity;
   }
 
