@@ -129,8 +129,9 @@ export class TokensService {
   }
 
   genereateResponse(entity: Tokens): Partial<Tokens> {
-    const { id=null, createdAt=null, ..._entity } = entity;
-    return _entity;
+    delete entity.id;
+    delete entity.createdAt;
+    return entity;
   }
 
   async deleteExpiredTokens(): Promise<void> {
