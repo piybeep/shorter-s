@@ -4,6 +4,7 @@ import hashids from 'hashids/cjs/hashids';
 import { Repository, LessThan } from 'typeorm';
 import { SaveUrlDto } from './dto/save-url.dto';
 import { Tokens } from './entities/tokens.entity';
+import { compareSync } from 'bcrypt';
 
 @Injectable()
 export class TokensService {
@@ -16,7 +17,7 @@ export class TokensService {
     return await this.tokensRepository.find();
   }
 
-  async getUrl(token: string): Promise<{ url: string }> {
+  async getUrl(token: string): Promise<Partial<Tokens>> {
     const db_token: Tokens = await this.tokensRepository.findOneBy({ token });
 
     if (db_token) {
@@ -37,30 +38,60 @@ export class TokensService {
         }
       }
 
-      return { url: db_token.originalUrl };
+      return this.genereateResponse(db_token);
     } else {
       throw new HttpException('Token not found', 404);
     }
   }
 
-  async saveUrl(payload: SaveUrlDto): Promise<{ token: string }> {
+  async saveUrl(payload: SaveUrlDto): Promise<Partial<Tokens>> {
     const count: number = await this.tokensRepository.countBy({
       originalUrl: payload.url,
     });
 
-    let token: string;
+    let token: Tokens;
 
     if (count > 0) {
-      const find_equal_token = await this.tokensRepository.findOneBy({
-        originalUrl: payload.url,
-        connectQty: payload.connectQty,
-        hashedPassword: payload.password,
-        deathDate: payload.deathDate,
+      let find_equal_token = await this.tokensRepository.find({
+        where: {
+          originalUrl: payload.url,
+          connectQty: payload.connectQty,
+          deathDate: payload.deathDate,
+        },
       });
 
       if (find_equal_token) {
         // Ссылка есть в базе с теми же параметрами
-        token = find_equal_token.token;
+        if (payload.password) {
+          // Для ссылки существует пароль
+          let token_with_password: Tokens[];
+          token_with_password = find_equal_token.filter((token): Boolean => {
+            if (token.hashedPassword != null) {
+              return compareSync(payload.password, token.hashedPassword);
+            } else return false;
+          });
+          if (token_with_password.length > 0) {
+            // Найдена ссылка с таким же паролем и параметрами
+            token = token_with_password[0];
+          } else {
+            //Не найдена ссылка с такие же паролем. Создание новой
+            const new_token: Tokens = this.tokensRepository.create({
+              token: this.getHash(payload.url, count),
+              originalUrl: payload.url,
+              connectQty: payload.connectQty,
+              hashedPassword: payload.password,
+              deathDate: payload.deathDate,
+            });
+
+            await this.tokensRepository.save(new_token);
+            token = new_token;
+          }
+        } else {
+          // Для ссылки не существует пароля
+          !Array.isArray(find_equal_token)
+            ? (token = find_equal_token)
+            : (token = find_equal_token[0]);
+        }
       } else {
         // Ссылка есть в базе, но пришли другие параметры
         const new_token: Tokens = this.tokensRepository.create({
@@ -72,7 +103,7 @@ export class TokensService {
         });
 
         await this.tokensRepository.save(new_token);
-        token = new_token.token;
+        token = new_token;
       }
     } else {
       // Сохранение новой ссылки
@@ -85,15 +116,20 @@ export class TokensService {
       });
 
       await this.tokensRepository.save(new_token);
-      token = new_token.token;
+      token = new_token;
     }
 
-    return { token };
+    return this.genereateResponse(token);
   }
 
   getHash(url: string, count = 0): string {
     const hasher = new hashids(url, 6);
     return hasher.encode(url.length + count);
+  }
+
+  genereateResponse(entity: Tokens): Partial<Tokens> {
+    const { id, createdAt, ..._entity } = entity;
+    return _entity;
   }
 
   async deleteExpiredTokens(): Promise<void> {
