@@ -23,7 +23,7 @@ export class TokensController {
     description: 'Получение ссылки по токену.',
   })
   @Get(':token')
-  getUrl(@Param('token') token: string): Promise<{ url: string }> {
+  getUrl(@Param('token') token: string): Promise<Partial<Tokens>> {
     return this.tokensService.getUrl(token);
   }
 
@@ -33,7 +33,7 @@ export class TokensController {
     description: 'Сохранение ссылки.',
   })
   @Post()
-  async saveUrl(@Body() data: SaveUrlDto): Promise<{ token: string }> {
+  async saveUrl(@Body() data: SaveUrlDto): Promise<Partial<Tokens>> {
     return await this.tokensService.saveUrl(data);
   }
 }
